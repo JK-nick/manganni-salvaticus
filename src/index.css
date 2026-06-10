@@ -1,0 +1,595 @@
+/* ============================================================
+   MANGANNI SALVATICUS — Design System
+   Phase 1: Layout. No animations yet (Motion.dev arrives Phase 4).
+   Colors come directly from the client spec.
+   ============================================================ */
+
+:root {
+  /* Core palette (from spec) */
+  --green: #00ff66;          /* primary — neon green */
+  --red: #ff3030;            /* secondary — bright red */
+  --bg: #050505;             /* near black */
+  --text: #ffffff;
+  --glass: rgba(255, 255, 255, 0.05);
+
+  /* Derived tones */
+  --text-dim: rgba(255, 255, 255, 0.6);
+  --text-faint: rgba(255, 255, 255, 0.35);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-strong: rgba(255, 255, 255, 0.08);
+  --green-glow: rgba(0, 255, 102, 0.35);
+  --red-glow: rgba(255, 48, 48, 0.45);
+
+  /* Type */
+  --font-display: 'Anton', sans-serif;          /* cinematic poster type */
+  --font-body: 'Space Grotesk', sans-serif;     /* techy, readable */
+  --font-mono: 'Space Mono', monospace;         /* labels, eyebrows, data */
+
+  /* Layout */
+  --nav-height: 72px;
+  --rail-width: 88px;        /* sponsor conveyor columns */
+  --content-max: 1100px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   BACKGROUND VIDEO LAYER (placeholder until Phase 2)
+   A fixed layer behind everything. For now: layered gradients
+   suggesting fog + depth, so sections already read as "emerging
+   from darkness." The <video> element replaces .video-placeholder
+   in Phase 2 without touching anything else.
+   ============================================================ */
+
+.video-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.video-placeholder {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0, 255, 102, 0.06), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 48, 48, 0.05), transparent),
+    radial-gradient(ellipse 100% 80% at 20% 60%, rgba(255, 255, 255, 0.02), transparent),
+    var(--bg);
+}
+
+/* dark vignette so foreground text always survives the video */
+.video-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent, rgba(5, 5, 5, 0.85));
+}
+
+/* everything that scrolls sits above the video layer */
+.site {
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================================
+   NAVBAR — transparent black glass, always visible
+   ============================================================ */
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-height);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  background: rgba(5, 5, 5, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.navbar-logo {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.navbar-logo span {
+  color: var(--green);
+}
+
+.navbar-links {
+  display: flex;
+  gap: 36px;
+  list-style: none;
+}
+
+.navbar-links a {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.navbar-links a:hover,
+.navbar-links a:focus-visible {
+  color: var(--green);
+}
+
+.navbar-login {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text);
+  text-decoration: none;
+  padding: 10px 20px;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--glass);
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.navbar-login:hover,
+.navbar-login:focus-visible {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+/* ============================================================
+   SPONSOR RAILS — left & right vertical conveyors
+   Phase 1: static columns. Phase 3 adds the infinite loop motion.
+   ============================================================ */
+
+.sponsor-rail {
+  position: fixed;
+  top: var(--nav-height);
+  bottom: 0;
+  width: var(--rail-width);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  border-color: var(--glass-border);
+}
+
+.sponsor-rail.left {
+  left: 0;
+  border-right: 1px solid var(--glass-border);
+}
+
+.sponsor-rail.right {
+  right: 0;
+  border-left: 1px solid var(--glass-border);
+}
+
+.sponsor-slot {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-faint);
+  text-transform: uppercase;
+}
+
+.sponsor-rail-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  writing-mode: vertical-rl;
+}
+
+/* ============================================================
+   SECTION SHELL
+   Every story chapter is full-height and centered, so Phase 4's
+   dissolve/scale transitions can wrap each one cleanly.
+   ============================================================ */
+
+.section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--nav-height) + 48px) calc(var(--rail-width) + 32px) 64px;
+}
+
+.section-inner {
+  width: 100%;
+  max-width: var(--content-max);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  margin-bottom: 20px;
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+
+.hero {
+  position: relative;
+  text-align: center;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 10vw, 8.5rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  color: var(--red);
+  text-shadow:
+    0 0 18px var(--red-glow),
+    0 0 60px var(--red-glow),
+    0 0 120px rgba(255, 48, 48, 0.25);
+  margin-bottom: 28px;
+}
+
+.hero-subtitle {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+
+.hero-subtitle em {
+  font-style: normal;
+  color: var(--text);
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: -10vh;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--green);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.scroll-indicator svg {
+  filter: drop-shadow(0 0 8px var(--green-glow));
+}
+
+/* ============================================================
+   CALENDAR — glassmorphism centerpiece
+   Phase 1: static grid rendered from events.json.
+   Phase 5 adds hover-expand, green glow, slide-out details.
+   ============================================================ */
+
+.calendar-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 40px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+}
+
+.calendar-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.calendar-month {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.calendar-weekday {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  text-align: center;
+  padding-bottom: 10px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.calendar-day.empty {
+  background: transparent;
+}
+
+.calendar-day.has-event {
+  border-color: rgba(0, 255, 102, 0.35);
+  color: var(--text);
+  background: rgba(0, 255, 102, 0.05);
+}
+
+.event-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green-glow);
+}
+
+.calendar-events {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.event-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.event-date {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--green);
+  white-space: nowrap;
+  min-width: 72px;
+}
+
+.event-name {
+  font-weight: 500;
+  flex: 1;
+}
+
+.event-tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   CATEGORIES — four large circular cards (from the sketch)
+   ============================================================ */
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+  margin-top: 12px;
+}
+
+.category-card {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background:
+    radial-gradient(circle at 30% 25%, var(--glass-strong), rgba(255, 255, 255, 0.01)),
+    var(--glass);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  padding: 24px;
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.category-card:hover,
+.category-card:focus-visible {
+  border-color: var(--green);
+  box-shadow: 0 0 40px rgba(0, 255, 102, 0.12);
+}
+
+.category-num {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.25em;
+  color: var(--green);
+}
+
+.category-name {
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 1.6vw, 1.35rem);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+
+.category-desc {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  max-width: 18ch;
+}
+
+/* ============================================================
+   STUB SECTIONS — Mission / Impact / CTA
+   Structure in place so the INDEX matches the spec; content
+   built out in later phases.
+   ============================================================ */
+
+.stub-note {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  border: 1px dashed var(--glass-border);
+  border-radius: 12px;
+  padding: 18px 24px;
+  display: inline-block;
+}
+
+.cta {
+  text-align: center;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 36px;
+}
+
+.btn {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 16px 44px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--green);
+  color: #031a0c;
+  box-shadow: 0 0 30px rgba(0, 255, 102, 0.25);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--glass-border);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus-visible {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1024px) {
+  .sponsor-rail {
+    display: none; /* rails return as a horizontal strip in Phase 3 mobile pass */
+  }
+  .section {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar-links {
+    display: none; /* mobile menu lands in Phase 6 polish */
+  }
+  .calendar-card {
+    padding: 22px;
+  }
+  .calendar-events .event-tag {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    transition: none !important;
+  }
+}

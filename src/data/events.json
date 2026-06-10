@@ -1,0 +1,28 @@
+{
+  "events": [
+    {
+      "id": 1,
+      "date": "2026-06-13",
+      "title": "Community Training Camp",
+      "category": "Training",
+      "location": "Main Facility",
+      "description": "Open training session for all program athletes."
+    },
+    {
+      "id": 2,
+      "date": "2026-06-20",
+      "title": "Veterans Program Orientation",
+      "category": "Veterans",
+      "location": "Main Facility",
+      "description": "Welcome session for incoming veterans program members."
+    },
+    {
+      "id": 3,
+      "date": "2026-06-27",
+      "title": "Sponsor & Community Night",
+      "category": "Community",
+      "location": "TBA",
+      "description": "An evening connecting sponsors, families, and athletes."
+    }
+  ]
+}
