@@ -24,7 +24,7 @@ export default function App() {
   return (
     <>
       {/* z-0 — the world */}
-      <VideoLayer src="/videos/background.mp4" />
+      <VideoLayer src={`${import.meta.env.BASE_URL}videos/background.mp4`} />
 
       {/* z-1 — the film that rises on scroll */}
       <ScrollFilm />
