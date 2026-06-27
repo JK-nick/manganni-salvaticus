@@ -647,6 +647,10 @@ Six phases, derived from the client spec and our planning.
 - [x] App.jsx z-stack established: VideoLayer (z-0) → ScrollFilm (z-1) → content (z-2).
 - [x] `public/videos/` enforced lowercase for Linux/production compatibility.
 - [x] Git repo initialized and pushed to GitHub.
+- [x] GitHub Actions deploy workflow (`.github/workflows/deploy.yml`) — builds with Vite and deploys `dist/` to GitHub Pages on every push to `main`.
+- [x] `vite.config.js` base path set to `/manganni-salvaticus/` for correct asset URLs on GitHub Pages.
+- [x] Video path updated to `${import.meta.env.BASE_URL}videos/background.mp4` — works in both local dev and production.
+- [x] Site live at **https://jk-nick.github.io/manganni-salvaticus/**
 
 ### 🚧 In Progress
 - [ ] Phase 3 — sponsor conveyor animation (next milestone).
@@ -759,6 +763,10 @@ Chronological log of important decisions and **why**.
 - **RAF scroll handling in `ScrollFilm`.** The scroll listener uses `requestAnimationFrame` and writes directly to the DOM via a ref — zero React state updates in the scroll hot path. This is the correct pattern for scroll-synced CSS values and keeps the experience jank-free.
 - **Client-provided footage.** `Swinging.mov` (HEVC, 1440×1080, 36 s) was supplied and converted to H.264 MP4 using ffmpeg (`-crf 23`, `-an`, `-movflags +faststart`). Output ~11.6 MB, web-safe, streams from the first byte.
 - **`public/videos/` enforced lowercase.** macOS is case-insensitive but Linux (production servers, CI) is not. Renamed `Videos/` → `videos/` to prevent 404s on any non-macOS host.
+- **GitHub Actions for deployment (not branch-based Pages).** Branch-based GitHub Pages serves raw source files — Vite apps need a build step first. The `.github/workflows/deploy.yml` workflow runs `npm ci` + `npm run build` and uploads `dist/` to Pages on every push to `main`. This is the required pattern for any React/Vite project on GitHub Pages.
+- **`vite.config.js` base set to `/manganni-salvaticus/`.** Without this, Vite generates absolute paths (`/assets/...`) that 404 on GitHub Pages where the app lives in a subdirectory. The `base` option rewrites all asset URLs at build time.
+- **Video src uses `import.meta.env.BASE_URL`.** A hardcoded `/videos/background.mp4` path works locally (served from `/`) but 404s on GitHub Pages (served from `/manganni-salvaticus/`). Using `\`${import.meta.env.BASE_URL}videos/background.mp4\`` resolves correctly in both environments with no extra config. Apply this pattern to all future `public/` asset references.
+- **Hosting target confirmed: GitHub Pages.** Free, integrated with the existing repo, sufficient for all planned phases. Custom domain can be added later via the Pages settings.
 
 ---
 
@@ -775,7 +783,7 @@ Items needing client clarification:
   approved; who will be the admin user(s)?
 - **CTA destinations** — where do Volunteer and Donate lead (external platforms,
   forms, payment processor)?
-- **Hosting target** — GitHub Pages vs Netlify/Vercel vs other.
+- ~~**Hosting target**~~ — **Resolved: GitHub Pages** (`jk-nick.github.io/manganni-salvaticus`), deployed via GitHub Actions workflow. Custom domain TBD.
 - **Domain name** for the live site.
 - **Real content** for Meet The Team, Veterans Programs, About Us,
   Vision/Future, and Impact stats.
@@ -835,7 +843,13 @@ Append a new entry after each work session using this template.
 - **Outstanding Tasks:** Phase 3 sponsor conveyor animation; commit Phase 2 to GitHub.
 - **Next Session Goals:** Phase 3 — build infinite vertical sponsor rail loops (left rail drifts up, right drifts down).
 
-> **Placeholder — add the next session entry here.**
+### Session — 2026-06-27 (Deployment)
+- **Summary:** Got the site live on GitHub Pages. The branch-based deploy was serving raw source files (blank page). Fixed by adding a GitHub Actions build workflow, setting Vite's base path for the subdirectory, and switching the video src to use `import.meta.env.BASE_URL`. Also walked through the full git commit/push/sync workflow for the first time.
+- **Changes Made:** Added `.github/workflows/deploy.yml` (Actions: checkout → Node 20 → `npm ci` → `npm run build` → upload `dist/` → deploy to Pages); added `base: '/manganni-salvaticus/'` to `vite.config.js`; updated `App.jsx` video src to `\`${import.meta.env.BASE_URL}videos/background.mp4\``; switched GitHub Pages source from "Deploy from a branch" to "GitHub Actions" in repo Settings → Pages.
+- **New Decisions:** GitHub Pages as hosting target (confirmed); GitHub Actions build+deploy pattern; `import.meta.env.BASE_URL` for all `public/` asset paths.
+- **Files Modified:** `.github/workflows/deploy.yml` (new), `vite.config.js` (base added), `src/App.jsx` (video path fix).
+- **Outstanding Tasks:** Phase 3 sponsor conveyor animation.
+- **Next Session Goals:** Phase 3 — infinite vertical sponsor rail loops (left up, right down). Upload `PROJECT_CONTEXT.md` at the start of the new chat.
 
 ---
 
@@ -855,12 +869,14 @@ Append a new entry after each work session using this template.
 
 - **Fonts:** Anton (display) · Space Grotesk (body) · Space Mono (labels/data).
 
-- **Current Progress:** Phases 1–2 complete. Video background live (`background.mp4`
-  from client footage). `ScrollFilm` overlay confirmed working. Repo at
-  `github.com/JK-nick/manganni-salvaticus`. Ready to commit Phase 2.
+- **Current Progress:** Phases 1–2 fully complete and **live**. Site deployed at
+  `https://jk-nick.github.io/manganni-salvaticus/` via GitHub Actions. Video
+  background, ScrollFilm overlay, and full layout confirmed working in production.
 
-- **Next Task:** Commit Phase 2, then build **Phase 3 — sponsor conveyors**
-  (infinite vertical loops, left up / right down).
+- **Hosting:** GitHub Pages · deployed via `.github/workflows/deploy.yml` · auto-deploys on push to `main`.
+
+- **Next Task:** Build **Phase 3 — sponsor conveyors** (infinite vertical loops,
+  left rail drifts up, right rail drifts down). Start new chat, upload this file.
 
 - **Development Priorities:** smoothness > flash · cinematic storytelling ·
   purposeful motion · polish > quantity · consistency · reduced-motion always.
