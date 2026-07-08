@@ -27,7 +27,7 @@
 
   /* Layout */
   --nav-height: 72px;
-  --rail-width: 88px;        /* sponsor conveyor columns */
+  --rail-width: 108px;        /* sponsor conveyor columns */
   --content-max: 1100px;
 }
 
@@ -170,7 +170,10 @@ button:focus-visible {
 
 /* ============================================================
    SPONSOR RAILS — left & right vertical conveyors
-   Phase 1: static columns. Phase 3 adds the infinite loop motion.
+   Phase 3: infinite, seamless rAF-driven loop (see SponsorRail.jsx).
+   Cards butt directly against each other (no gap) — the "fully
+   connected, Ferris-wheel" look — and are rotated in 3D to face the
+   center of the page, like gondolas hung facing the middle of the ride.
    ============================================================ */
 
 .sponsor-rail {
@@ -182,9 +185,8 @@ button:focus-visible {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 40px;
   border-color: var(--glass-border);
+  padding-top: 18px;
 }
 
 .sponsor-rail.left {
@@ -197,28 +199,64 @@ button:focus-visible {
   border-left: 1px solid var(--glass-border);
 }
 
-.sponsor-slot {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  color: var(--text-faint);
-  text-transform: uppercase;
-}
-
 .sponsor-rail-label {
   font-family: var(--font-mono);
   font-size: 0.6rem;
+  font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--text-faint);
+  color: rgba(255, 255, 255, 0.85);
   writing-mode: vertical-rl;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.sponsor-rail-viewport {
+  flex: 1;
+  width: 100%;
+  overflow: hidden;
+  perspective: 500px;
+}
+
+.sponsor-track {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  will-change: transform;
+}
+
+.sponsor-card {
+  width: 100%;
+  height: 148px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 10px;
+  background: rgba(255, 255, 255, 0.0375);
+  border-top: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--glass-border);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.sponsor-rail.left .sponsor-card {
+  transform: rotateY(-26deg);
+}
+
+.sponsor-rail.right .sponsor-card {
+  transform: rotateY(26deg);
+}
+
+.sponsor-card-logo {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  user-select: none;
+  pointer-events: none;
 }
 
 /* ============================================================
@@ -562,12 +600,23 @@ button:focus-visible {
 
 @media (max-width: 1024px) {
   .sponsor-rail {
-    display: none; /* rails return as a horizontal strip in Phase 3 mobile pass */
+    width: 69px; /* narrower vertical bar on smaller screens, still vertical */
   }
+
+  .sponsor-card {
+    height: 110px; /* shorter cards to fit the narrower/shorter rail nicely */
+    padding: 8px 6px;
+  }
+
+  .sponsor-rail-label {
+    font-size: 0.55rem;
+  }
+
   .section {
     padding-left: 24px;
     padding-right: 24px;
   }
+
   .categories-grid {
     grid-template-columns: repeat(2, 1fr);
   }
