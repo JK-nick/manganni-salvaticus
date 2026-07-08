@@ -542,8 +542,14 @@ manganni-salvaticus/
 ├── README.md                # run instructions + phase roadmap
 ├── PROJECT_CONTEXT.md        # ← this file (single source of truth)
 ├── public/
-│   └── videos/              # background footage drop folder (lowercase!)
-│       └── background.mp4   # client-supplied footage (converted from .mov)
+│   ├── videos/               # background footage drop folder (lowercase!)
+│   │   └── background.mp4    # client-supplied footage (converted from .mov)
+│   └── sponsors/             # sponsor logo PNGs (lowercase, matches sponsors.js `file`)
+│       ├── gdc.png
+│       ├── naples-nissan.png
+│       ├── greener-grass-sod.png
+│       ├── sacred-alkaline-water.png
+│       └── authentic-home-improvements.png
 └── src/
     ├── main.jsx             # React entry; mounts <App/>
     ├── App.jsx              # composes the page (z-stack + INDEX architecture)
@@ -552,7 +558,7 @@ manganni-salvaticus/
     │   ├── VideoLayer.jsx   # z-0: fixed full-viewport background video
     │   ├── ScrollFilm.jsx   # z-1: scroll-driven dark overlay (0 → 0.82 opacity)
     │   ├── Navbar.jsx
-    │   ├── SponsorRail.jsx  # used twice (left/right) via `side` prop
+    │   ├── SponsorRail.jsx  # used twice (left/right) via `side` prop; rAF seamless loop
     │   ├── Hero.jsx
     │   ├── CalendarSection.jsx
     │   ├── Categories.jsx
@@ -560,7 +566,8 @@ manganni-salvaticus/
     │   ├── Impact.jsx       # stub
     │   └── CTA.jsx
     └── data/
-        └── events.json      # event data (shaped like future Supabase rows)
+        ├── events.json      # event data (shaped like future Supabase rows)
+        └── sponsors.js      # sponsor id/name/logo-filename records
 ```
 
 ### Conventions
@@ -595,12 +602,25 @@ Six phases, derived from the client spec and our planning.
   gradient fallback when absent; build passes. ✅ Met (awaiting actual footage).
 - **Dependencies:** Phase 1.
 
-### Phase 3 — Sponsor conveyors
+### Phase 3 — Sponsor conveyors ✅
 - **Objective:** the two infinite vertical sponsor loops.
 - **Tasks:** infinite-loop animation (left up, right down); seamless wrap;
-  sponsor logo slots; mobile treatment (horizontal strip).
+  real sponsor logos; responsive sizing.
 - **Completion criteria:** smooth, seamless, performant infinite motion both
-  sides; responsive.
+  sides; responsive. ✅ Met.
+- **Actual implementation (differs from original plan in a few spots):**
+  - Seamless loop is **rAF-driven and DOM-measured** (`trackRef.scrollHeight / 2`
+    after mount), not CSS keyframes — this was the fix for a persistent
+    empty-space-gap bug from an earlier CSS-keyframe attempt.
+  - Cards are **rotated in 3D (`rotateY`)** to face the center of the page —
+    a "Ferris wheel gondola" effect — rather than sitting flat.
+  - Cards are **directly connected with zero gap** between them (chain-link
+    look), not spaced/floating slots.
+  - **Mobile stays vertical on both sides** (narrower rail + shorter cards),
+    **not** the horizontal bottom-ticker treatment originally planned — client
+    preference during build.
+  - Real sponsor logos (5 PNGs) sourced, resized to a 600px max dimension, and
+    wired in via `sponsors.js` + `public/sponsors/`.
 - **Dependencies:** Phase 1 (rails exist); ideally Motion.dev installed.
 
 ### Phase 4 — Motion.dev transitions (the cinematic scroll)
@@ -651,9 +671,15 @@ Six phases, derived from the client spec and our planning.
 - [x] `vite.config.js` base path set to `/manganni-salvaticus/` for correct asset URLs on GitHub Pages.
 - [x] Video path updated to `${import.meta.env.BASE_URL}videos/background.mp4` — works in both local dev and production.
 - [x] Site live at **https://jk-nick.github.io/manganni-salvaticus/**
+- [x] Phase 3 — sponsor conveyor rails: rAF-driven, DOM-measured seamless
+      infinite loop (left up, right down); cards directly connected (no gap);
+      3D gondola tilt (`rotateY`) facing center; real logos for all 5 sponsors
+      (GD&C, Naples Nissan, Greener Grass SOD, Sacred Alkaline Water, Authentic
+      Home Improvements); hover-to-pause; vertical rail preserved on mobile
+      (narrower, not converted to a horizontal ticker); committed and deployed.
 
 ### 🚧 In Progress
-- [ ] Phase 3 — sponsor conveyor animation (next milestone).
+- [ ] None — between phases. Phase 4 not yet started.
 
 ### ⬜ Not Started
 - [ ] Motion.dev install + cinematic scroll transitions (Phase 4).
@@ -670,10 +696,12 @@ Six phases, derived from the client spec and our planning.
 
 In priority order:
 
-1. **Phase 3 — Sponsor conveyors.** Build the infinite vertical loops (left rail drifts up, right drifts down). This is the next planned build milestone.
-2. **Install Motion.dev (and Lenis).** Needed for Phase 4; can be set up at the end of Phase 3.
-3. **Phase 4 — Cinematic scroll transitions.** The signature experience — dissolve/scale/blur between chapters.
-4. **Begin Phase 5 planning** — create the Supabase project and confirm the admin approach with the client.
+1. **Install Motion.dev and Lenis.** First concrete step of Phase 4.
+2. **Phase 4 — Cinematic scroll transitions.** The signature experience —
+   dissolve/scale/blur between chapters. Build one chapter transition first
+   (e.g. Hero → Calendar) as a proof of concept before extending to the rest.
+3. **Begin Phase 5 planning** — create the Supabase project and confirm the
+   admin approach with the client.
 
 ---
 
@@ -767,6 +795,12 @@ Chronological log of important decisions and **why**.
 - **`vite.config.js` base set to `/manganni-salvaticus/`.** Without this, Vite generates absolute paths (`/assets/...`) that 404 on GitHub Pages where the app lives in a subdirectory. The `base` option rewrites all asset URLs at build time.
 - **Video src uses `import.meta.env.BASE_URL`.** A hardcoded `/videos/background.mp4` path works locally (served from `/`) but 404s on GitHub Pages (served from `/manganni-salvaticus/`). Using `\`${import.meta.env.BASE_URL}videos/background.mp4\`` resolves correctly in both environments with no extra config. Apply this pattern to all future `public/` asset references.
 - **Hosting target confirmed: GitHub Pages.** Free, integrated with the existing repo, sufficient for all planned phases. Custom domain can be added later via the Pages settings.
+- **Sponsor rail seamless loop is rAF-driven and DOM-measured, not CSS keyframes.** `SponsorRail.jsx` duplicates the sponsor list, then measures the real rendered `scrollHeight` (or `scrollWidth` on mobile) of one full set after mount and wraps the scroll offset via modulo. This replaced an earlier CSS-keyframe + `MIN_REPEATS` approach that couldn't fully eliminate empty space at the rail bottom because it assumed a fixed height that drifted from the real rendered layout at different viewport sizes.
+- **Sponsor cards use a 3D `rotateY` "gondola" tilt, not a flat layout.** Left-rail cards tilt `-26deg`, right-rail cards tilt `+26deg`, so both visually face the center of the page — like Ferris wheel gondolas hung facing the middle of the ride. Requires `perspective` on the viewport and `preserve-3d`/`backface-visibility: hidden` on the cards.
+- **Sponsor cards are directly connected (zero gap), not spaced slots.** Matches the client's "fully connected, no gaps, like a Ferris wheel" direction — cards butt against each other and share borders rather than floating with margin between them.
+- **Mobile keeps both sponsor rails vertical (narrower), rejecting the original horizontal-ticker plan.** The client explicitly wanted "one on each side, both vertical running like the bar you use to go up and down on a web page" at every screen size — so mobile just narrows `--rail-width` and shortens card height rather than converting to a horizontal bottom strip.
+- **Sponsor card background is a dedicated, more-transparent value, not a change to the shared `--glass` token.** `--glass` (`rgba(255,255,255,0.05)`) is used site-wide (nav, calendar card, etc.); the sponsor cards needed to be ~25% more transparent on their own, so they use a scoped `rgba(255,255,255,0.0375)` instead of touching the global variable.
+- **Sponsor logo assets resized to a 600px max dimension before committing.** Client-supplied PNGs were up to 4000px and several MB each — far oversized for a ~108px rail card. Resized/optimized with PIL, bringing each file down to 32KB–200KB.
 
 ---
 
@@ -778,7 +812,7 @@ Items needing client clarification:
   impact sections.
 - **Real background footage** — will the client provide original jungle footage,
   or should we proceed with licensed stock as a placeholder/permanent?
-- **Sponsor list** — actual sponsor names/logos for the conveyors.
+- ~~**Sponsor list** — actual sponsor names/logos for the conveyors.~~ — **Resolved:** 5 sponsors confirmed with real logo assets — GD&C, Naples Nissan, Greener Grass SOD, Sacred Alkaline Water, Authentic Home Improvements. Logos live in `public/sponsors/`, data in `src/data/sponsors.js`.
 - **Calendar event source of truth** — confirm Supabase + owner-managed admin is
   approved; who will be the admin user(s)?
 - **CTA destinations** — where do Volunteer and Donate lead (external platforms,
@@ -851,6 +885,14 @@ Append a new entry after each work session using this template.
 - **Outstanding Tasks:** Phase 3 sponsor conveyor animation.
 - **Next Session Goals:** Phase 3 — infinite vertical sponsor rail loops (left up, right down). Upload `PROJECT_CONTEXT.md` at the start of the new chat.
 
+### Session — 2026-07-08 (Phase 3)
+- **Summary:** Rebuilt the sponsor conveyor rails from scratch (prior Phase 3 work had been lost — missing from the uploaded project zip at session start). Built the rAF-driven seamless loop, added the 3D gondola tilt, sourced and wired in real sponsor logos, tuned sizing/transparency, and got it committed and deployed live.
+- **Changes Made:** Rewrote `SponsorRail.jsx` — duplicated sponsor list, rAF loop with DOM-measured `scrollHeight/2` wrap distance, direct DOM mutation via ref, hover-to-pause, `prefers-reduced-motion` respected; new `src/data/sponsors.js`; rewrote sponsor CSS in `index.css` — connected (zero-gap) cards, `rotateY` gondola tilt, `--rail-width` token; iterated with the client from text-placeholder cards to real `<img>` logos; sourced 5 sponsor PNGs from client, resized/optimized from up to 4000px/3MB down to a 600px max dimension via PIL; renamed to match `sponsors.js` (`gdc.png`, `naples-nissan.png`, `greener-grass-sod.png`, `sacred-alkaline-water.png`, `authentic-home-improvements.png`) and placed in `public/sponsors/`; adjusted mobile breakpoint to keep both rails vertical (narrower) instead of the originally-planned horizontal ticker, per client preference; final polish pass — card background ~25% more transparent (scoped value, not the shared `--glass` token), `.sponsor-rail-label` bold + brighter white, rail width narrowed ~7% (116px → 108px, mobile 74px → 69px).
+- **New Decisions:** rAF + DOM-measured seamless loop over CSS keyframes (see Decision Log); 3D gondola tilt design; zero-gap connected cards; mobile stays vertical on both sides (ticker plan dropped); sponsor card transparency scoped separately from the global `--glass` token; logo assets resized to 600px max before committing.
+- **Files Modified:** `src/components/SponsorRail.jsx` (rewritten), `src/data/sponsors.js` (new), `src/index.css` (sponsor rail/card sections rewritten), `public/sponsors/*.png` (5 new logo files).
+- **Outstanding Tasks:** Phase 4 — Motion.dev + Lenis install and first cinematic scroll transition.
+- **Next Session Goals:** Install Motion.dev + Lenis; build and confirm one chapter transition (Hero → Calendar) as a proof of concept before extending further.
+
 ---
 
 ## 18. Quick Reference
@@ -869,14 +911,16 @@ Append a new entry after each work session using this template.
 
 - **Fonts:** Anton (display) · Space Grotesk (body) · Space Mono (labels/data).
 
-- **Current Progress:** Phases 1–2 fully complete and **live**. Site deployed at
+- **Current Progress:** Phases 1–3 fully complete and **live**. Site deployed at
   `https://jk-nick.github.io/manganni-salvaticus/` via GitHub Actions. Video
-  background, ScrollFilm overlay, and full layout confirmed working in production.
+  background, ScrollFilm overlay, full layout, and sponsor conveyor rails
+  (real logos, seamless rAF loop, gondola tilt) confirmed working in production.
 
 - **Hosting:** GitHub Pages · deployed via `.github/workflows/deploy.yml` · auto-deploys on push to `main`.
 
-- **Next Task:** Build **Phase 3 — sponsor conveyors** (infinite vertical loops,
-  left rail drifts up, right rail drifts down). Start new chat, upload this file.
+- **Next Task:** Build **Phase 4 — Motion.dev + Lenis cinematic scroll
+  transitions**. Start with installing both, then one proof-of-concept chapter
+  transition (Hero → Calendar) before extending further.
 
 - **Development Priorities:** smoothness > flash · cinematic storytelling ·
   purposeful motion · polish > quantity · consistency · reduced-motion always.
